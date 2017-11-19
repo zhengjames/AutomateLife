@@ -1,8 +1,13 @@
 #!/bin/bash
+#prepend ticket name to commit message
+#ticket name is (LMS|CR)-[0-9]*
 currentBranchName=`git rev-parse --abbrev-ref HEAD`
 if (($# == 0)); then 
 	echo "Commit message cannot be empty"
 else
-commitMessage="$currentBranchName $@"
+
+trimmedBranchName=`grep -o -E '(LMS|CR)-[0-9]*' <<< "$currentBranchName"`
+
+commitMessage="$trimmedBranchName $@"
 exec git commit -m "$commitMessage"
 fi
