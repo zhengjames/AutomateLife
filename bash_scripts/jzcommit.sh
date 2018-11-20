@@ -7,7 +7,7 @@ if (($# == 0)); then
 	echo "Commit message cannot be empty"
 else
 
-trimmedBranchName=`grep -o -E '(LMS|CR)-[0-9]*' <<< "$currentBranchName"`
+trimmedBranchName=`grep -o -E '[A-Z]*-[0-9]*' <<< "$currentBranchName"`
 
 commitMessage="$trimmedBranchName $@"
 exec git commit -m "$commitMessage"
