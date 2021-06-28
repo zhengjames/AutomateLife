@@ -45,6 +45,7 @@ jobs:
           id: changes
           # Set outputs using the command.
           run: |
+            echo "base_ref ${{github.base_ref}} head_ref ${{github.head_ref}}"
             echo "::set-output name=all::$(git diff --name-only --diff-filter=ACMRT origin/master | xargs)"
             echo "::set-output name=ts::$(git diff --name-only --diff-filter=ACMRT origin/master | grep .json)"
   lint:
