@@ -46,8 +46,8 @@ jobs:
           # Set outputs using the command.
           run: |
             echo "base_ref ${{github.base_ref}} head_ref ${{github.head_ref}}"
-            echo "::set-output name=all::$(git diff --name-only --diff-filter=ACMRT origin/master | xargs)"
-            echo "::set-output name=ts::$(git diff --name-only --diff-filter=ACMRT origin/master | grep .json)"
+            echo "::set-output name=all::$(git fetch origin master:master) && $(git diff --name-only --diff-filter=ACMRT origin/master | xargs)"
+            echo "::set-output name=ts::$(git fetch origin master:master) && $(git diff --name-only --diff-filter=ACMRT origin/master | grep .json)"
   lint:
     runs-on: ubuntu-latest
     # require the first job to have ran
