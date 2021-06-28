@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - 'project1/**'
+  pull_request:
+    branches:
+      - master
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
@@ -15,13 +18,6 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
-      - name: Get changed files
-        id: changes
-        # Set outputs using the command.
-        run: |
-          echo "::set-output name=all::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)"
-          echo "::set-output name=ts::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep .ts$ | xargs)"
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -35,3 +31,29 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+  changedfiles:
+      runs-on: ubuntu-latest
+      # Map a step output to a job output
+      outputs:
+        all: ${{ steps.changes.outputs.all }}
+        ts: ${{ steps.changes.outputs.ts }}
+      steps:
+          # Make sure we have some code to diff.
+        - name: Checkout repository
+          uses: actions/checkout@v2
+        - name: Get changed files
+          id: changes
+          # Set outputs using the command.
+          run: |
+            echo "base_ref ${{github.base_ref}} head_ref ${{github.head_ref}}"
+            echo "::set-output name=all::$(git fetch origin master:master && git diff --name-only --diff-filter=ACMRT origin/master | xargs)"
+            echo "::set-output name=ts::$(git fetch origin master:master && git diff --name-only --diff-filter=ACMRT origin/master | grep .json)"
+  lint:
+    runs-on: ubuntu-latest
+    # require the first job to have ran
+    needs: changedfiles
+    # only run there are changed files
+    if: ${{needs.changedfiles.outputs.ts}}
+    steps:
+      - name: echo changed files
+        run: echo ${{needs.changedfiles.outputs.ts}}
